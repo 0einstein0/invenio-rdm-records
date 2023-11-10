@@ -10,8 +10,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Button, Form, Grid, Icon } from "semantic-ui-react";
-
-import { ArrayField, SelectField, RichInputField } from "react-invenio-forms";
+import { ArrayField, SelectField, FormEditorField } from "react-invenio-forms";
 import { emptyAdditionalDescription } from "./initialValues";
 import { LanguagesField } from "../../LanguagesField";
 import { i18next } from "@translations/invenio_rdm_records/i18next";
@@ -19,7 +18,7 @@ import { sortOptions } from "../../../utils";
 
 export class AdditionalDescriptionsField extends Component {
   render() {
-    const { fieldPath, options, recordUI, editorConfig } = this.props;
+    const { fieldPath, options, recordUI } = this.props;
     return (
       <ArrayField
         addButtonLabel={i18next.t("Add description")}
@@ -34,10 +33,9 @@ export class AdditionalDescriptionsField extends Component {
             <Grid className="description">
               <Grid.Row>
                 <Grid.Column mobile={16} tablet={10} computer={12}>
-                  <RichInputField
+                  <FormEditorField
                     fieldPath={`${fieldPathPrefix}.description`}
                     label={i18next.t("Additional Description")}
-                    editorConfig={editorConfig}
                     optimized
                     required
                   />
@@ -111,10 +109,8 @@ AdditionalDescriptionsField.propTypes = {
     ),
   }).isRequired,
   recordUI: PropTypes.object,
-  editorConfig: PropTypes.object,
 };
 
 AdditionalDescriptionsField.defaultProps = {
   recordUI: {},
-  editorConfig: undefined,
 };
