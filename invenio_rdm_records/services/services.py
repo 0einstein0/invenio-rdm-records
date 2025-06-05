@@ -586,7 +586,6 @@ class RDMRecordService(RecordService):
                 raise RecordDeletedException(record, result_item=result)
 
         return result
-
     def read_draft(self, identity, id_, expand=False):
         """Retrieve a draft of a record.
 
@@ -637,6 +636,7 @@ class RDMRecordService(RecordService):
                         "anymore. Please contact support if you still need to make these changes."
                     )
                 )
+
 
         return super().update_draft(
             identity,

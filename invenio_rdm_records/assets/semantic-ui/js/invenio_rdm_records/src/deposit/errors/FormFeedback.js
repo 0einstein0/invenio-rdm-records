@@ -26,6 +26,7 @@ import {
   FILE_IMPORT_FAILED,
   FILE_UPLOAD_SAVE_DRAFT_FAILED,
   RESERVE_PID_FAILED,
+  DRAFT_LOADED_WITH_VALIDATION_ERRORS,
 } from "../state/types";
 import PropTypes from "prop-types";
 import { flattenAndCategorizeErrors } from "react-invenio-forms";
@@ -105,6 +106,10 @@ const ACTIONS = {
       "Files import from the previous version failed. Please try again. If the problem persists, contact user support."
     ),
   },
+  [DRAFT_LOADED_WITH_VALIDATION_ERRORS]: {
+    feedback: "warning",
+    message: i18next.t("The draft has validation feedback in"),
+  },
 };
 
 const feedbackConfig = {
@@ -123,6 +128,15 @@ class DisconnectedFormFeedback extends Component {
     this.sections = {
       ...props.sectionsConfig,
     };
+    this.state = {
+      domReady: false,
+    };
+  }
+  // Set domReady after initial render completes, so we can get the sections in the form
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState({ domReady: true });
+    }, 0);
   }
 
   getErrorSections(errors) {
@@ -184,7 +198,10 @@ class DisconnectedFormFeedback extends Component {
 
   render() {
     const { errors: errorsProp, actionState } = this.props;
+    //eslint-disable-next-line no-debugger
+    debugger;
     const errors = errorsProp || {};
+    const { domReady } = this.state;
 
     const { feedback: initialFeedback, message } = _get(ACTIONS, actionState, {
       feedback: undefined,
@@ -196,10 +213,9 @@ class DisconnectedFormFeedback extends Component {
     }
 
     const { flattenedErrors, severityChecks } = flattenAndCategorizeErrors(errors);
-    const errorSections = this.getErrorSections({
-      ...flattenedErrors,
-      ...severityChecks,
-    });
+    const errorSections = domReady
+      ? this.getErrorSections({ ...flattenedErrors, ...severityChecks })
+      : [];
 
     const noSeverityChecksWithErrors = Object.values(severityChecks).every(
       (severityObject) => severityObject.severity !== "error"
@@ -211,9 +227,8 @@ class DisconnectedFormFeedback extends Component {
         ? "suggestive"
         : initialFeedback;
 
-    // if no field is specified on the backend, then the validation message is on the `_schema` field
-    // if the backend returns an explicit message e.g server error, then we use that instead of the default one
-    const backendErrorMessage = errors.message || errors._schema;
+    // if no field is specified on the backend, then the message is on the `_schema` field
+    const backendErrorMessage = errors._schema;
 
     // Retrieve the corresponding icon and type if the feedback is a valid key,
     // else fallback to warning.
